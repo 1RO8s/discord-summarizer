@@ -20,4 +20,4 @@ jobs:
           OPEN_AI_TOKEN: ${{ secrets.OPEN_AI_TOKEN }}
           DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
           SERVER_ID: ${{ secrets.SERVER_ID }}
-          SUMMARY_CHANNEL: ${{ secrets.SUMMARY_CHANNEL }}
+          SUMMARY_CHANNEL_ID: ${{ secrets.SUMMARY_CHANNEL_ID }}
