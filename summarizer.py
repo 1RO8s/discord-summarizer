@@ -32,7 +32,7 @@ MAX_BODY_TOKENS = 3000
 # Discord Client
 DISCORD_TOKEN = str(os.environ.get('DISCORD_TOKEN')).strip()
 SERVER_ID = str(os.environ.get('SERVER_ID')).strip()
-SUMMARY_CHANNEL_ID = str(os.environ.get('SUMMARY_CHANNEL')).strip()
+SUMMARY_CHANNEL_ID = str(os.environ.get('SUMMARY_CHANNEL_ID')).strip()
 intents = discord.Intents.default()
 intents.messages = True
 intents.message_content = True
@@ -215,27 +215,33 @@ async def on_ready():
     # time range
     start_time, end_time = get_time_range()
 
-    [print(f"f:{g} , {g.id}") for g in client.guilds]
-    guilds = [g for g in client.guilds if g.id == int(SERVER_ID)]
-    if len(guilds) == 0:
+    print(f"参加しているサーバー")
+    [print(f"\t{g.name} , {g.id}") for g in client.guilds]
+    guild = next((g for g in client.guilds if g.id == int(SERVER_ID)),None)    
+    if guild == None:
         await client.close()
-    guild = guilds[0]
     # [print(f"f:{g}") for g in guild]
-    print(f"guild name: {guild.name}, id: {guild.id}")
+    print(f"要約対象: {guild.name}({guild.id})")
 
     result_text = []
     for channel in guild.text_channels:
+        if channel.id == int(SUMMARY_CHANNEL_ID): continue
         print(f"\tname:{channel.name}, id:{channel.id}")
         history = channel.history(before=end_time)
         messages = []
         async for msg in history:
-            messages.append(f"{msg.author.name}:{msg.content}")
-        if not messages : continue 
-        
+            if msg.author.bot: continue
+            messages.append(f"{msg.author.name}:{msg.clean_content}")
+            print(f"# {msg.author.name}:{msg.clean_content}")
+        if not messages :
+            result_text.append(f"<#{channel.id}> has no messages")
+            print(f"\tchannel {channel.name} has no message")
+            continue 
+        print(f"\tchannel name{channel.name}")
         messages.reverse()
         messages = list(map(remove_emoji, messages))
         # messages = list(map(convert2name, messages))
-        result_text.append(f"----\n<#{channel.id}>\n")
+        result_text.append(f"<#{channel.id}>\n")
         for spilitted_messages in split_messages_by_token_count(messages):
             sp_msg = '\n'.join(spilitted_messages)
             # print(f"splited message: {sp_msg}")
@@ -245,10 +251,17 @@ async def on_ready():
     # # サマリのタイトル
     title = (f"{start_time.strftime('%Y-%m-%d')} public channels summary\n\n")
 
+    summary_channnel = next((c for c in guild.text_channels if c.id == int(SUMMARY_CHANNEL_ID)),None)
+
     if DEBUG:
         print(title + "\n".join(result_text))
     else:
-        retry(lambda: channel.send(title + "\n".join(result_text)), exception=DiscordException)
+        async def retry_send():
+            try:
+                await summary_channnel.send(title + "\n".join(result_text))
+            except DiscordException:
+                retry(retry_send, DiscordException)
+        await retry_send()
     await client.close()
 
 
@@ -256,7 +269,7 @@ async def on_ready():
 
 
 if __name__ == '__main__':
-    if OPEN_AI_TOKEN == "" or DISCORD_TOKEN == "":
+    if OPEN_AI_TOKEN == "" or DISCORD_TOKEN == "" or SUMMARY_CHANNEL_ID == "":
         print("OPEN_AI_TOKEN, DISCORD_TOKEN, CHANNEL_ID must be set.")
         sys.exit(1)
     client.run(DISCORD_TOKEN)
