@@ -1,0 +1,1 @@
+# ChatGPT を使って Discord の Public channel をまとめて要約するスクリプト
