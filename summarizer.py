@@ -39,7 +39,6 @@ LANGUAGE = {LANGUAGE}
 TEMPERATURE = {TEMPERATURE}
 CHAT_MODEL = {CHAT_MODEL}
 MAX_BODY_TOKENS = {MAX_BODY_TOKENS}
-DISCORD_TOKEN = {DISCORD_TOKEN}
 SERVER_ID = {SERVER_ID}
 SUMMARY_CHANNEL_ID = {SUMMARY_CHANNEL_ID}
 TIMEZONE_STR = {TIMEZONE_STR}
@@ -181,6 +180,7 @@ def split_messages_by_token_count(messages: list[str]) -> list[list[str]]:
 async def on_ready():
     # time range
     start_time, end_time = get_time_range()
+    print(f"{start_time.strftime('%Y/%m/%d %H:%m')} - {end_time.strftime('%Y/%m/%d %H:%m')}")
 
     guild = next((g for g in client.guilds if g.id == int(SERVER_ID)),None)    
     if guild == None:
@@ -197,7 +197,6 @@ async def on_ready():
         if not messages :
             result_text.append(f"<#{channel.id}>\n  -- No messages --")
             continue 
-        messages.reverse()
         messages = list(map(remove_emoji, messages))
         result_text.append(f"<#{channel.id}>")
         for spilitted_messages in split_messages_by_token_count(messages):
