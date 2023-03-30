@@ -11,13 +11,39 @@ OpenAI の情報取扱に関する規約は下記などを確認してくださ�
 [API data usage policies | OpenAI](https://platform.openai.com/docs/data-usage-policies)
 
 
-## GitHub Actionsで動かす
+## 機能
+- 動作時刻の25時間前までのチャットを要約し、指定したチャンネルに投稿。
+- GitHub Actions で毎日午前5時に動く。
+- 全てのパブリックチャンネルが対象
 
-GitHub Actions で毎日午前5時に動くようになっています。
+## 利用方法
 
 ### 自分のGitHubアカウントにforkする
 - 右上の"Fork"ボタンを押して、自分のリポジトリにforkします
 - 有料プランにするなどして GitHub Actions が実行できるようにしておきます
+
+### Discord botを作成する
+
+[Botアカウント作成](https://discordpy.readthedocs.io/ja/latest/discord.html)
+
+### botの招待
+
+- [Developer Portal](https://discord.com/developers/applications)にて、作成したアプリケーションのページを開く
+- OAuth2 -> Generalを開き、CLIENT ID の"Copy"を押して値を取得しておく
+
+![discord-client-id](images/discord-client-id.png)
+
+- 以下のURLを開いて、対象のサーバーにbotを招待する。YOUR_CLIENT_IDには上記で取得した CLIENT ID を設定する。
+```
+https://discord.com/api/oauth2/authorize?client_id=YOUR_CLIENT_ID&permissions=67584&scope=bot
+```
+> Send Messages、Read Message Historyを許可します
+
+### Botの権限を追加する
+- [Developer Portal](https://discord.com/developers/applications)にて、作成したアプリケーションのページを開く
+- Botメニューを開き、MESSAGE CONTENT INTENTを有効化する
+![message-content-intent](images/message-content-setting.png)
+
 
 ### 環境変数を設定する
 - "Settings"タブを開き、左の"Secrets and variables" -> "Actions"を開きます
@@ -35,39 +61,26 @@ GitHub Actions で毎日午前5時に動くようになっています。
 - "API Key"ページにアクセスすると、API キーが表示されます。これをコピーして Value に貼り付けます
 
 #### SERVER_ID
-- [開発者モードを有効化](#開発者モードの有効化)しておく
+- Discordの[開発者モードを有効化](#開発者モードの有効化)しておく
 - 対象のサーバーに移動後、サーバー名を右クリックして、メニューから「IDをコピー」を選択
+- コピーした値をValue に貼り付けます
 
 
 #### SUMMARY_CHANNEL_ID
-- [開発者モードを有効化](#開発者モードの有効化)しておく
-- 要約を投稿するチャンネルに移動後、チャンネル名を右クリックして、メニューから「IDをコピー」を選択
-
-### botの作成
-
-[Botアカウント作成](https://discordpy.readthedocs.io/ja/latest/discord.html)
-
-
-### 権限設定
-- Developer Portalを開く
-- Bot -> MESSAGE CONTENT INTENTを有効化する
-![message-content-intent](images/message-content-setting.png)
-
-### botの招待
-YOUR_CLIENT_IDにはbotのclient idを設定
-
-以下のURLを開いて、対象のサーバーにbotを招待してください
-```
-https://discord.com/api/oauth2/authorize?client_id=YOUR_CLIENT_ID&permissions=67584&scope=bot
-```
+- 対象サーバーにサマリ投稿用のチャンネルを作成する
+- Discordの[開発者モードを有効化](#開発者モードの有効化)しておく
+- 投稿用チャンネルに移動後、チャンネル名を右クリックして、メニューから「IDをコピー」を選択
+- コピーした値をValue に貼り付けます
 
 ### 実行
 - GitHub のリポジトリで"Settings"タブを開き、左の"Actions"→"General"を開きます
 - "Actions permissions"の"Allow all actions and reusable workflows"を選択して保存してください
 
-これらの設定をすると、毎日午前 5 時に Slack の Public channel の要約結果が投稿されます。
+これらの設定をすると、毎日午前 5 時に Discord の Public channel の要約結果が投稿されます。
 
-手動で実行してみる場合には"Actions" タブを開き、左の"Summary"をクリックして、右の"Run workflow"をおしてください。
+手動で実行してみる場合には"Actions" タブを開き、左の"discord-summarizer"をクリックして、右の"Run workflow"をおしてください。
+
+---
 
 #### 開発者モードの有効化
 - ユーザー設定を開き、詳細設定 -> 開発者モードをONにする
