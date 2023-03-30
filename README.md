@@ -4,12 +4,11 @@ by [1RO8s](https://twitter.com/kizzo168) 2023-[APACHE LICENSE, 2.0](https://www.
 
 ChatGPTを使ってDiscordのPublic channnelの要約を投稿するスクリプトです。
 
-[masuidrive](https://twitter.com/masuidrive)さんが開発された[Slack版](https://github.com/masuidrive/slack-summarizer)をもとにしています・
-
+[masuidrive](https://twitter.com/masuidrive)さんが開発された[Slack版](https://github.com/masuidrive/slack-summarizer)をもとにしています。
 
 OpenAI の情報取扱に関する規約は下記などを確認してください。
 
-https://platform.openai.com/docs/data-usage-policies
+[API data usage policies | OpenAI](https://platform.openai.com/docs/data-usage-policies)
 
 
 ## GitHub Actionsで動かす
@@ -36,13 +35,13 @@ GitHub Actions で毎日午前5時に動くようになっています。
 - "API Key"ページにアクセスすると、API キーが表示されます。これをコピーして Value に貼り付けます
 
 #### SERVER_ID
+- [開発者モードを有効化](#開発者モードの有効化)しておく
 - 対象のサーバーに移動後、サーバー名を右クリックして、メニューから「IDをコピー」を選択
-> IDを確認するには[開発者モードを有効化](#開発者モードの有効化)する
+
 
 #### SUMMARY_CHANNEL_ID
-- ユーザー設定を開き、詳細設定 -> 開発者モードをONにする
-![message-content-intent](images/developer-mode.png)
-- 対象のサーバーに移動後、サーバー名を右クリックして、メニューから「IDをコピー」を選択
+- [開発者モードを有効化](#開発者モードの有効化)しておく
+- 要約を投稿するチャンネルに移動後、チャンネル名を右クリックして、メニューから「IDをコピー」を選択
 
 ### botの作成
 
@@ -50,7 +49,7 @@ GitHub Actions で毎日午前5時に動くようになっています。
 
 
 ### 権限設定
-Developer Portal
+- Developer Portalを開く
 - Bot -> MESSAGE CONTENT INTENTを有効化する
 ![message-content-intent](images/message-content-setting.png)
 
@@ -61,6 +60,14 @@ YOUR_CLIENT_IDにはbotのclient idを設定
 ```
 https://discord.com/api/oauth2/authorize?client_id=YOUR_CLIENT_ID&permissions=67584&scope=bot
 ```
+
+### 実行
+- GitHub のリポジトリで"Settings"タブを開き、左の"Actions"→"General"を開きます
+- "Actions permissions"の"Allow all actions and reusable workflows"を選択して保存してください
+
+これらの設定をすると、毎日午前 5 時に Slack の Public channel の要約結果が投稿されます。
+
+手動で実行してみる場合には"Actions" タブを開き、左の"Summary"をクリックして、右の"Run workflow"をおしてください。
 
 #### 開発者モードの有効化
 - ユーザー設定を開き、詳細設定 -> 開発者モードをONにする
