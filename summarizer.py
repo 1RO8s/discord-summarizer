@@ -89,7 +89,7 @@ def summarize(text: str, language: str = "Japanese"):
             "user",
             "content":
             "\n".join([
-                f"Please meaning summarize the following chat log to flat bullet list in {language}.",
+                f"Please meaning summarize the following chat log to flat bullet list in {language} by polite language.",
                 "It isn't line by line summary. Please summarize within 5 to 10 lines.",
                 "Do not include greeting/salutation/polite expressions in summary.",
                 "With make it easier to read."
@@ -234,14 +234,14 @@ async def on_ready():
             messages.append(f"{msg.author.name}:{msg.clean_content}")
             print(f"# {msg.author.name}:{msg.clean_content}")
         if not messages :
-            result_text.append(f"<#{channel.id}> has no messages")
-            print(f"\tchannel {channel.name} has no message")
+            result_text.append(f"<#{channel.id}>\n  -- No messages --")
+            print(f"\tchannel {channel.name}no message")
             continue 
         print(f"\tchannel name{channel.name}")
         messages.reverse()
         messages = list(map(remove_emoji, messages))
         # messages = list(map(convert2name, messages))
-        result_text.append(f"<#{channel.id}>\n")
+        result_text.append(f"<#{channel.id}>")
         for spilitted_messages in split_messages_by_token_count(messages):
             sp_msg = '\n'.join(spilitted_messages)
             # print(f"splited message: {sp_msg}")
@@ -263,10 +263,6 @@ async def on_ready():
                 retry(retry_send, DiscordException)
         await retry_send()
     await client.close()
-
-
-
-
 
 if __name__ == '__main__':
     if OPEN_AI_TOKEN == "" or DISCORD_TOKEN == "" or SUMMARY_CHANNEL_ID == "":
