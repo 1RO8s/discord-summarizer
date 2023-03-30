@@ -14,22 +14,16 @@ import discord
 from discord.errors import DiscordException
 from utils import remove_emoji, retry
 
+# for local test
 from dotenv import load_dotenv
-
-
 load_dotenv()
 
 # Load settings from environment variables
 OPEN_AI_TOKEN = str(os.environ.get('OPEN_AI_TOKEN')).strip()
 LANGUAGE = str(os.environ.get('LANGUAGE') or "Japanese").strip()
-TIMEZONE_STR = str(os.environ.get('TIMEZONE') or 'Asia/Tokyo').strip()
 TEMPERATURE = float(os.environ.get('TEMPERATURE') or 0.3)
 CHAT_MODEL = str(os.environ.get('CHAT_MODEL') or "gpt-3.5-turbo").strip()
-DEBUG = str(os.environ.get('DEBUG') or "").strip() != ""
 MAX_BODY_TOKENS = 3000
-
-
-# Discord Client
 DISCORD_TOKEN = str(os.environ.get('DISCORD_TOKEN')).strip()
 SERVER_ID = str(os.environ.get('SERVER_ID')).strip()
 SUMMARY_CHANNEL_ID = str(os.environ.get('SUMMARY_CHANNEL_ID')).strip()
@@ -37,24 +31,20 @@ intents = discord.Intents.default()
 intents.messages = True
 intents.message_content = True
 client = discord.Client(intents=intents)
-
-# Set OpenAI API key
-openai.api_key = OPEN_AI_TOKEN
-
+TIMEZONE_STR = str(os.environ.get('TIMEZONE') or 'Asia/Tokyo').strip()
+DEBUG = str(os.environ.get('DEBUG') or "").strip() != ""
 
 print(f"""
-OPEN_AI_TOKEN = {OPEN_AI_TOKEN}
 LANGUAGE = {LANGUAGE}
-TIMEZONE_STR = {TIMEZONE_STR}
 TEMPERATURE = {TEMPERATURE}
 CHAT_MODEL = {CHAT_MODEL}
-DEBUG = {DEBUG}
 MAX_BODY_TOKENS = {MAX_BODY_TOKENS}
 DISCORD_TOKEN = {DISCORD_TOKEN}
 SERVER_ID = {SERVER_ID}
 SUMMARY_CHANNEL_ID = {SUMMARY_CHANNEL_ID}
+TIMEZONE_STR = {TIMEZONE_STR}
+DEBUG = {DEBUG}
 """)
-
 
 def summarize(text: str, language: str = "Japanese"):
     """
@@ -90,7 +80,7 @@ def summarize(text: str, language: str = "Japanese"):
             "content":
             "\n".join([
                 f"Please meaning summarize the following chat log to flat bullet list in {language} by polite language.",
-                "It isn't line by line summary. Please summarize within 5 to 10 lines.",
+                "It isn't line by line summary.",
                 "Do not include greeting/salutation/polite expressions in summary.",
                 "With make it easier to read."
                 f"Write in {language}.", "", text
@@ -98,10 +88,8 @@ def summarize(text: str, language: str = "Japanese"):
         }])
 
     if DEBUG:
-        # print(response["choices"][0]["message"]['content'])
-        None
+        print(response["choices"][0]["message"]['content'])
     return response["choices"][0]["message"]['content']
-
 
 def get_time_range():
     """
@@ -160,7 +148,6 @@ def estimate_openai_chat_token_count(text: str) -> int:
 
     return sum(map(counter, matches))
 
-
 def split_messages_by_token_count(messages: list[str]) -> list[list[str]]:
     """
     Split a list of strings into sublists with a maximum token count.
@@ -190,65 +177,34 @@ def split_messages_by_token_count(messages: list[str]) -> list[list[str]]:
     result.append(current_sublist)
     return result
 
-async def mention2name(mention: str):
-    """
-    <@1066680660468695062> -> 
-    """
-    user_id = int(re.sub(r'<@|>', '', mention))
-    user = await client.fetch_user(user_id)
-    return user.name
-
-async def convert2name(content: str):
-    mentions = re.findall(r'<@![0-9]+>', content)
-    for mention in mentions:
-        name = await mention2name(mention)
-        content = content.replace(mention, f'@{name}')
-    return content
-
-
 @client.event
 async def on_ready():
-
-    # setting Discord Client
-    print(f"DISCORD_TOKEN:{DISCORD_TOKEN}")
-
     # time range
     start_time, end_time = get_time_range()
 
-    print(f"\nJoined server")
-    [print(f"\t{g.name} , {g.id}") for g in client.guilds]
     guild = next((g for g in client.guilds if g.id == int(SERVER_ID)),None)    
     if guild == None:
         await client.close()
-    print(f"Target server: {guild.name}({guild.id})")
 
     result_text = []
     for channel in guild.text_channels:
         if channel.id == int(SUMMARY_CHANNEL_ID): continue
-        print(f"{channel.name}({channel.id})")
         history = channel.history(after=start_time, before=end_time)
         messages = []
         async for msg in history:
             if msg.clean_content == "": continue
-            messages.append(f"{msg.author.name}:{msg.clean_content}")
-            print(f"\t{msg.author.name}:{msg.clean_content}")
+            messages.append(f"{msg.author.display_name}:{msg.clean_content}")
         if not messages :
             result_text.append(f"<#{channel.id}>\n  -- No messages --")
-            print(f"\tNo message on {channel.name} channel")
             continue 
         messages.reverse()
         messages = list(map(remove_emoji, messages))
-        # messages = list(map(convert2name, messages))
         result_text.append(f"<#{channel.id}>")
         for spilitted_messages in split_messages_by_token_count(messages):
-            sp_msg = '\n'.join(spilitted_messages)
-            # print(f"splited message: {sp_msg}")
             text = summarize("\n".join(spilitted_messages), LANGUAGE)
             result_text.append(text)
 
-    # # サマリのタイトル
-    title = (f"{start_time.strftime('%Y-%m-%d')} public channels summary\n\n")
-
+    title = (f"__{start_time.strftime('%Y-%m-%d')} public channels summary__\n\n")
     summary_channnel = next((c for c in guild.text_channels if c.id == int(SUMMARY_CHANNEL_ID)),None)
 
     if DEBUG:
@@ -263,9 +219,8 @@ async def on_ready():
     await client.close()
 
 if __name__ == '__main__':
-    if OPEN_AI_TOKEN == "" or DISCORD_TOKEN == "" or SUMMARY_CHANNEL_ID == "":
-        print("OPEN_AI_TOKEN, DISCORD_TOKEN, CHANNEL_ID must be set.")
+    if OPEN_AI_TOKEN == "" or DISCORD_TOKEN == "" or SERVER_ID == "" or SUMMARY_CHANNEL_ID == "":
+        print("OPEN_AI_TOKEN, DISCORD_TOKEN, SERVER_ID, SUMMARY_CHANNEL_ID must be set.")
         sys.exit(1)
-    client.run(DISCORD_TOKEN)
-    print("Finish!!")    
-
+    openai.api_key = OPEN_AI_TOKEN
+    client.run(DISCORD_TOKEN) 
