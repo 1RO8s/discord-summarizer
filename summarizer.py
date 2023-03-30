@@ -215,29 +215,27 @@ async def on_ready():
     # time range
     start_time, end_time = get_time_range()
 
-    print(f"参加しているサーバー")
+    print(f"\nJoined server")
     [print(f"\t{g.name} , {g.id}") for g in client.guilds]
     guild = next((g for g in client.guilds if g.id == int(SERVER_ID)),None)    
     if guild == None:
         await client.close()
-    # [print(f"f:{g}") for g in guild]
-    print(f"要約対象: {guild.name}({guild.id})")
+    print(f"Target server: {guild.name}({guild.id})")
 
     result_text = []
     for channel in guild.text_channels:
         if channel.id == int(SUMMARY_CHANNEL_ID): continue
-        print(f"\tname:{channel.name}, id:{channel.id}")
-        history = channel.history(before=end_time)
+        print(f"{channel.name}({channel.id})")
+        history = channel.history(after=start_time, before=end_time)
         messages = []
         async for msg in history:
-            if msg.author.bot: continue
+            if msg.clean_content == "": continue
             messages.append(f"{msg.author.name}:{msg.clean_content}")
-            print(f"# {msg.author.name}:{msg.clean_content}")
+            print(f"\t{msg.author.name}:{msg.clean_content}")
         if not messages :
             result_text.append(f"<#{channel.id}>\n  -- No messages --")
-            print(f"\tchannel {channel.name}no message")
+            print(f"\tNo message on {channel.name} channel")
             continue 
-        print(f"\tchannel name{channel.name}")
         messages.reverse()
         messages = list(map(remove_emoji, messages))
         # messages = list(map(convert2name, messages))
