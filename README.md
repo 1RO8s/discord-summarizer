@@ -23,11 +23,14 @@ OpenAI の情報取扱に関する規約は下記などを確認してくださ�
 - 有料プランにするなどして GitHub Actions が実行できるようにしておきます
 
 ### Discord botを作成する
+- 下記リンクを参考にDiscord Botを作成する
+
+※ 作成時に取得したTOKENをメモしておくこと
 
 [Botアカウント作成](https://discordpy.readthedocs.io/ja/latest/discord.html)
 
-### botの招待
-
+### Botの招待　
+※ Botを追加するには「サーバー管理」権限が必要です
 - [Developer Portal](https://discord.com/developers/applications)にて、作成したアプリケーションのページを開く
 - OAuth2 -> Generalを開き、CLIENT ID の"Copy"を押して値を取得しておく
 
@@ -37,7 +40,7 @@ OpenAI の情報取扱に関する規約は下記などを確認してくださ�
 ```
 https://discord.com/api/oauth2/authorize?client_id=YOUR_CLIENT_ID&permissions=67584&scope=bot
 ```
-> Send Messages、Read Message Historyを許可します
+- "メッセージを送信"、"メッセージ履歴を読む"にチェックを入れて、"認証"」を押します
 
 ### Botの権限を追加する
 - [Developer Portal](https://discord.com/developers/applications)にて、作成したアプリケーションのページを開く
@@ -52,9 +55,11 @@ https://discord.com/api/oauth2/authorize?client_id=YOUR_CLIENT_ID&permissions=67
 
 
 #### DISCORD_TOKEN
+- Bot作成時に取得したTokenをコピーしてValueに貼り付けます
+
+※ なくしてしまった場合は"Reset Token"ボタンを押して再取得する
 
 #### OPEN_AI_TOKEN
-- OpenAI の認証トークン
 - [OpenAI の Web サイト](https://platform.openai.com/)にアクセスしてください
 - 右上の"Sign In"ボタンをクリックし、アカウントにログインしてください
 - ページ上部の"API"メニューから、"API Key"をクリックして、API キーを生成します
@@ -64,7 +69,6 @@ https://discord.com/api/oauth2/authorize?client_id=YOUR_CLIENT_ID&permissions=67
 - Discordの[開発者モードを有効化](#開発者モードの有効化)しておく
 - 対象のサーバーに移動後、サーバー名を右クリックして、メニューから「IDをコピー」を選択
 - コピーした値をValue に貼り付けます
-
 
 #### SUMMARY_CHANNEL_ID
 - 対象サーバーにサマリ投稿用のチャンネルを作成する
